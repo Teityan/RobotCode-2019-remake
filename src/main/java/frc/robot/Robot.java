@@ -12,11 +12,23 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
+import com.ctre.phoenix.motorcontrol.*;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.IMotorController.*;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.SpeedController;
 //import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import edu.wpi.first.wpilibj.PWMTalonSRX;
+import com.ctre.phoenix.motorcontrol.*;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.IMotorController.*;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 //import edu.wpi.first.wpilibj.AnalogInput;
 
@@ -27,7 +39,8 @@ public class Robot extends TimedRobot {
     private XboxController driver, operator;
 
     // Motors
-    private Spark driveLeft_1,driveLeft_2, driveRight_1,driveRight_2;
+
+    private WPI_TalonSRX drive_right,drive_left;
     private Talon liftMotor;
     private VictorSP rollerMotor;
     private VictorSP climbMotor;
@@ -70,16 +83,6 @@ public class Robot extends TimedRobot {
     private NetworkTable networkTable;
     private double[] voltages;
     private int count=0;
-     private static double kDt = 0.02;
-  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 1.5);
-
-  private final TrapezoidProfile.Constraints m_constraints =
-      new TrapezoidProfile.Constraints(1.75, 0.75);
-  private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-  private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
-
-
-
 
     // functions
     private double deadbandProcessing(double value) {
@@ -106,10 +109,13 @@ public class Robot extends TimedRobot {
 
 
         // Motors
-        driveRight_1 = new Spark(7);
-        driveRight_2 = new Spark(8);
-        driveLeft_1 = new Spark(5);
-        driveLeft_2 = new Spark(6);
+        drive_left = new WPI_TalonSRX(0);
+        drive_right = new WPI_TalonSRX(1);
+
+        drive_left.configOpenloopRamp(0.5,0);
+        drive_right.configOpenloopRamp(0.5,0);
+        //drive_left.configMotionSCurveStrength(8,0);
+        //drive_right.configMotionSCurveStrength(8,0);
         liftMotor = new Talon(Const.LiftMotorPort);
 
         rollerMotor = new VictorSP(Const.RollerMotorPort);
@@ -160,7 +166,7 @@ public class Robot extends TimedRobot {
         state = new State();
 
         // Submodules
-        drive = new Drive(new SpeedControllerGroup(driveLeft_1,driveLeft_2), new SpeedControllerGroup(driveRight_1,driveRight_2), driveEncoder, gyro);
+        drive = new Drive(drive_left,drive_right, driveEncoder, gyro);
         lift = new Lift(liftMotor, liftEncoder);
         grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
         climb = new Climb(climbMotor, climbSolenoid);
@@ -205,27 +211,13 @@ public class Robot extends TimedRobot {
         } 
         
             state.driveState = State.DriveState.kManual;
-        /*    state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft)*0.8);    // 入力が直感と逆
+           state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft)*0.8);    // 入力が直感と逆
             state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight)*0.8);
             state.climbMotorSpeed = deadbandProcessing(driver.getY(Hand.kRight)*0.8);
             SmartDashboard.putNumber("DriveStraightSpeed",-driver.getY(Hand.kLeft)/0.8);
             SmartDashboard.putNumber("DriverRouteSpeed",driver.getX(Hand.kRight)/0.8);
             SmartDashboard.putNumber("climbMortorSpeed",driver.getY(Hand.kRight)/0.8);
-    */
-    if(driver.getY(Hand.kLeft)>0.2){
-        SmartDashboard.putNumber("in",driver.getY(Hand.kLeft));
-    m_goal = new TrapezoidProfile.State(0,5);
-    TrapezoidProfile profile = new TrapezoidProfile(m_constraints, m_goal, m_setpoint);
 
-    // Retrieve the profiled setpoint for the next timestep. This setpoint moves
-    // toward the goal while obeying the constraints.
-    m_setpoint = profile.calculate(0.02);
-     SmartDashboard.putNumber("m_set",m_setpoint.position);
-      SmartDashboard.putNumber("m_feed",m_feedforward.calculate(m_setpoint.velocity) / 12.0);
-    // Send setpoint to offboard controller PID
-    drive.setSetpoint(m_setpoint.position,
-                        m_feedforward.calculate(m_setpoint.velocity) / 12.0);
-    }
         if(driver.getBumper(Hand.kLeft)) {
             // 左のバンパーのボタンが押されたら低出力モード
             state.is_lowInputOn = true;
