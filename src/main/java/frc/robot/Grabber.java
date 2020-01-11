@@ -8,14 +8,17 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.VictorSP;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 public class Grabber {
 
-    private VictorSP rollerMotor;
+    private VictorSPX rollerMotor;
     private Solenoid barSolenoid;
     private Solenoid armSolenoid;
 
@@ -31,7 +34,7 @@ public class Grabber {
 		Ports
     */
 
-    Grabber(VictorSP rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
+    Grabber(VictorSPX rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
         this.rollerMotor = rollerMotor;
         this.barSolenoid = barSolenoid;
         this.armSolenoid = armSolenoid;
@@ -111,12 +114,12 @@ public class Grabber {
     }
 
     private void stopRoller() {
-        rollerMotor.stopMotor();
+        rollerMotor.set(ControlMode.PercentOutput,0.0);
         is_RollerMoving = false;
     }
 
     private void setRollerSpeed(double speed) {
-        rollerMotor.set(speed);
+        rollerMotor.set(ControlMode.PercentOutput,speed);
         is_RollerMoving = true;
     }
 

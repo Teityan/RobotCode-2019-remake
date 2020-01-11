@@ -13,8 +13,10 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 import com.ctre.phoenix.motorcontrol.*;
+import com.ctre.phoenix.motorcontrol.can.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.IMotorController.*;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.SpeedController;
@@ -22,10 +24,6 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj.PWMTalonSRX;
-import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.IMotorController.*;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -42,8 +40,8 @@ public class Robot extends TimedRobot {
 
     private WPI_TalonSRX drive_right,drive_left;
     private Talon liftMotor;
-    private VictorSP rollerMotor;
-    private VictorSP climbMotor;
+    private VictorSPX rollerMotor;
+    private Talon climbMotor;
 
     // Encoder, Gyro
     private Encoder rightDriveEncoder, leftDriveEncoder;
@@ -107,7 +105,6 @@ public class Robot extends TimedRobot {
         driver = new XboxController(Const.DriveControllerPort);
         operator = new XboxController(Const.OperateControllerPort);
 
-
         // Motors
         drive_left = new WPI_TalonSRX(0);
         drive_right = new WPI_TalonSRX(1);
@@ -118,9 +115,10 @@ public class Robot extends TimedRobot {
         //drive_right.configMotionSCurveStrength(8,0);
         liftMotor = new Talon(Const.LiftMotorPort);
 
-        rollerMotor = new VictorSP(Const.RollerMotorPort);
-
-        climbMotor = new VictorSP(Const.ClimbMotorPort);
+        rollerMotor = new VictorSPX(4);
+        rollerMotor.configPeakOutputForward(0.5);
+        rollerMotor.configOpenloopRamp(1,0);
+        climbMotor = new Talon(Const.ClimbMotorPort);
 
         rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
         leftDriveEncoder = new Encoder(Const.LeftDriveEncoderAPort, Const.LeftDriveEncoderBPort);
@@ -181,7 +179,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousPeriodic() {
-        teleopPeriodic();
+        // teleopPeriodic();
     }
 
     @Override
@@ -287,10 +285,13 @@ public class Robot extends TimedRobot {
         } else {
             state.is_holdingCargo = false;
         }
+        
+        SmartDashboard.putBoolean("Hold",false);
 
         if (driver.getTriggerAxis(Hand.kRight) > Const.Deadband) {
             // Right TriggerでCargoを掴む
             state.cargoState = State.CargoState.kHold;
+            SmartDashboard.putBoolean("Hold",true);
         } else if (driver.getTriggerAxis(Hand.kLeft) > Const.Deadband) {
             // Left TriggerでCargoを離す
             state.cargoState = State.CargoState.kRelease;

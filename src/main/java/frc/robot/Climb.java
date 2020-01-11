@@ -1,14 +1,14 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.Talon;
 
 public class Climb {
 
-    private VictorSP climbMotor;
+    private Talon climbMotor;
     private Solenoid climbSolenoid;
 
-    Climb(VictorSP climbMotor, Solenoid climbSolenoid){
+    Climb(Talon climbMotor, Solenoid climbSolenoid){
         this.climbMotor = climbMotor;
         this.climbSolenoid = climbSolenoid;
     }
