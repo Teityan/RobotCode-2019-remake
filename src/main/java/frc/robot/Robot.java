@@ -11,7 +11,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-
+import edu.wpi.cscore.*;
 import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -20,7 +20,7 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.IMotorController.*;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.SpeedController;
-//import edu.wpi.first.wpilibj.CameraServer;
+//import edu.wpi.first.wpilibj.ameraServer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj.PWMTalonSRX;
@@ -75,7 +75,7 @@ public class Robot extends TimedRobot {
     //                  leftBackSensor;
 
     // Camera
-    //private CameraServer elevatorCamera, frameCamera;
+    private CameraServer elevatorCamera, frameCamera;
 
     // NetWorkTable
     private NetworkTable networkTable;
@@ -155,9 +155,10 @@ public class Robot extends TimedRobot {
 
         // Camera
 
-        //UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture("ElevatorCamera", 0);
-        //UsbCamera camera2 = CameraServer.getInstance().startAutomaticCapture("FrameCamera", 1);
-        //camera1.setResolution(1280,720);
+        UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture("ElevatorCamera", 0);
+        UsbCamera camera2 = CameraServer.getInstance().startAutomaticCapture("FrameCamera", 1);
+        camera1.setResolution(1280,720);
+        //camera1.setResolution(1920,1080);
         //camera2.setResolution(1280,720);
 
         // State
